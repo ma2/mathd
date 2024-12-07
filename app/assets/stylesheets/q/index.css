@@ -1,0 +1,21 @@
+.number_boxes {
+    margin: 1em;
+}
+
+.operators {
+    margin: 1em;
+}
+
+.description {
+    margin: 1em;
+}
+
+.expression {
+    width: 70%;
+    margin: 1em;
+}
+
+.container{
+    display: flex;
+    align-items: center;
+}

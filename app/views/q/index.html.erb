@@ -1,0 +1,42 @@
+<h1>すうじたんてい</h1>
+<% content_for :js do %>
+  <%= javascript_import_module_tag "q/index" %>
+<% end %>
+<p id="stopwatch">0.000 秒</p>
+<button id="startButton">スタート</button>
+<button id="clearButton">クリア</button>
+<a href="/q/giveup">Give up!</a>
+<div class="description">
+  <span>× 0 や 0 ÷ は使えません</span>
+</div>
+<%= form_with url: "/q/update", method: :post do |form| %>
+  <%= form.hidden_field "q", value: @numbers.join %>
+  <div class="number_boxes">
+    <%= button_tag @numbers[0], name: 'clicked', value: 0, disabled: @disabled[0] %>
+    <%= button_tag @numbers[1], name: 'clicked', value: 1, disabled: @disabled[1] %>
+    <span>月</span>
+    <%= button_tag @numbers[2], name: 'clicked', value: 2, disabled: @disabled[2] %>
+    <%= button_tag @numbers[3], name: 'clicked', value: 3, disabled: @disabled[3] %>
+    <span>日</span>
+    <%= button_tag @numbers[4], name: 'clicked', value: 4, disabled: @disabled[4] %>
+    <%= button_tag @numbers[5], name: 'clicked', value: 5, disabled: @disabled[5] %>
+    <span>時</span>
+    <%= button_tag @numbers[6], name: 'clicked', value: 6, disabled: @disabled[6]%>
+    <%= button_tag @numbers[7], name: 'clicked', value: 7, disabled: @disabled[7]%>
+    <span>分</span>
+  </div>
+  <div class="operators">
+    <% %w(＋ － × ÷).each_with_index do |op, i| %>
+    <%= button_tag op, name: 'clicked', value: i + 8, disabled: @disabled[i + 8] %>
+    <% end %>
+  </div>
+  <div class="container" style="display: inline-flex; align-items: center">
+    <div class="expression">
+      <%= form.text_field "expression", readonly: true, value: @lexp, maxlength: 15 %>
+    </div>
+    ＝　
+    <div class="answer">
+      <%= @rexp %>
+    </div>
+  </div>
+<% end %>
