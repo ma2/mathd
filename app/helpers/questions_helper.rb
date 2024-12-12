@@ -90,6 +90,8 @@ module QuestionsHelper
         next
       end
       # if result.denominator == 1 && result <= 10r && result >= 0r
+      # rを除いて12文字以内ならOK
+      next if exp.delete("r").size != 12
       if result.denominator == 1 && [ 0r, 1r, 10r, 11r, 100r, 110r, 111r ].include?(result)
         return time_str, exp, result
       end

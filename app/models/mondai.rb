@@ -65,6 +65,11 @@ class Mondai
     nil
   end
 
+  def add_r_to_numbers(expression)
+    # 数値（整数）を検出し、末尾に `r` を追加
+    expression.gsub(/(\d+)/, '\1r')
+  end
+
   # 式入力が完了していればtrue
   def input_done
     # 演算子を削除して8文字なら完了

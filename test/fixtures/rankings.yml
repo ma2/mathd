@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mondai: MyString
+  rexp: 1
+  lexp: MyString
+  hn: MyString
+
+two:
+  mondai: MyString
+  rexp: 1
+  lexp: MyString
+  hn: MyString

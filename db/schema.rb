@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_11_28_070435) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_12_051035) do
   create_table "questions", force: :cascade do |t|
     t.string "date"
     t.string "expression"
@@ -18,5 +18,14 @@ ActiveRecord::Schema[8.0].define(version: 2024_11_28_070435) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_questions_on_date"
+  end
+
+  create_table "rankings", force: :cascade do |t|
+    t.string "mondai"
+    t.integer "rexp"
+    t.string "lexp"
+    t.string "hn"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 end

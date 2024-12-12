@@ -1,0 +1,37 @@
+<%= form_with(model: ranking) do |form| %>
+  <% if ranking.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(ranking.errors.count, "error") %> prohibited this ranking from being saved:</h2>
+
+      <ul>
+        <% ranking.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :mondai, style: "display: block" %>
+    <%= form.text_field :mondai %>
+  </div>
+
+  <div>
+    <%= form.label :rexp, style: "display: block" %>
+    <%= form.number_field :rexp %>
+  </div>
+
+  <div>
+    <%= form.label :lexp, style: "display: block" %>
+    <%= form.text_field :lexp %>
+  </div>
+
+  <div>
+    <%= form.label :hn, style: "display: block" %>
+    <%= form.text_field :hn %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

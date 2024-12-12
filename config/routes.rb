@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :rankings
   get "q/index"
   get "q/giveup"
   get "q/ranking"
