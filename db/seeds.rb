@@ -7,3 +7,13 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+require "csv"
+
+CSV.foreach('db/mondai.csv', headers: true) do |row|
+  Question.create(
+    date: row['date'],
+    expression: row['expression'],
+    value: row['value'],
+  )
+end

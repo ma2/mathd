@@ -4,12 +4,12 @@
 
 <h1>すうじたんてい</h1>
 <p id="stopwatch">0.000 秒</p>
-<button id="clearButton">クリア</button>
-<a href="/q/giveup">Give up!</a>
+<%# <button id="clearButton">クリア</button> %>
+<%= link_to "Give Up", q_giveup_path %>
 <div class="description">
   <span>× 0 や 0 ÷ は使えません</span>
 </div>
-<div class="<%=@cls%>">
+<div class="<%=@shake%>">
   <%= form_with url: "/q/update", method: :post do |form| %>
     <div class="number_boxes">
       <%= button_tag @buttons[0], name: 'clicked', value: 0, disabled: @disabled[0] %>
@@ -42,8 +42,14 @@
   <% end %>
 </div>
 
-<div class="result <%=@visible%>">
+<div class="result <%=@complete%>">
   正解です！
   <%=@time%>
-  <a href="ranking">ランキングへ</a>
+  <%= link_to "ランキングへ", q_ranking_path %>
+</div>
+
+<div class="result <%=@wrong%>">
+  残念でした！
+  <%=@time%>
+  <%= link_to "もう一度やる", root_path %>
 </div>

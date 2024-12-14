@@ -4,14 +4,15 @@ class QController < ApplicationController
     @lexp = session[:lexp]
     @disabled = session[:disabled]
     @buttons = session[:buttons]
-    @cls = "noshake"
-    @visible = "invisible"
-    # cookieにqが入っていなければ初期化する
-    if session[:lexp].blank?
+    @shake = "noshake"
+    @complete = "invisible"
+    @wrong = "invisible"
+    # セッションにlexp（ユーザ入力）が入っていなければ初期化する
+    if session[:result].blank? || session[:result] == "init"
       # タイマースタート
       # 日時を取得（タイムゾーン依存）
       now = get_now
-      # Questionテーブルから答えを取得
+      # Questionテーブルから右辺を取得
       @rexp = get_rexp(now)
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
@@ -27,42 +28,32 @@ class QController < ApplicationController
       # 加減乗除は何度でも使えるので非活性にならない
       @disabled[i] = true if i < 8
     end
-    puts "--result--"
-    puts session[:result]
     # 結果間違っているなら初期に戻す
     if session[:result] == "wrong"
-      @cls = "shake"
-      @lexp = ""
-      @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
-      session[:lexp] = @lexp
-      session[:disabled] = @disabled
+      @shake = "shake"
+      @wrong = "visible"
+      session[:result] = "init"
     end
-    # 許容できない選択の場合
+    # 許容できない選択の場合は画面を揺らす
     if session[:result] == "error"
-      @cls = "shake"
+      @shake = "shake"
     end
+    # 正解したら表示する
     if session[:result] == "complete"
-      @cls = "shake"
-      @visible = "visible"
+      @complete = "visible"
       reset_session
     end
-    puts "continue"
   end
 
   def update
-    # クリックしたボタンと式から新しい式を作る
-    # 式がvalidならresult=true、lexp=新しい式、button=クリックしたボタン
-    # invalidならresult=false、lexp=元の式、button=クリックしたボタン
-    # をCookieに格納して、indexにredirect
+    # クリックしたボタンと式から新しい式を作り評価する
     params.permit([ :clicked ])
     i = params[:clicked].to_i
     buttons = session[:buttons]
     new_lexp = session[:lexp] + buttons[i]
     session[:result] = false
     # ユーザー入力式が不正なら何もせずに:errorで返す
-    puts new_lexp
     unless lexp_is_good(new_lexp)
-      puts "lexp_is_bad"
       session[:result] = :error
       redirect_to action: :index
       return
@@ -76,7 +67,9 @@ class QController < ApplicationController
       redirect_to action: :index
       return
     end
-    session[:result] = all_ok(new_lexp, session[:rexp]) ? :complete : :wrong
+    result, value = all_ok(new_lexp, session[:rexp])
+    session[:result] = result ? :complete : :wrong
+    session[:value] = value
     redirect_to action: :index
   end
 
@@ -87,14 +80,18 @@ class QController < ApplicationController
     reset_session
   end
 
-  def get_now
-    "10291334"
+  private
+
+  def get_now(tz = "Asia/Tokyo")
+    Time.use_zone(tz) { Time.zone.now.strftime("%m%d%H%M") }
   end
 
   def get_rexp(now)
-    86
+    q = Question.find_by(date: now)
+    q.value
   end
 
+  #
   # 式がルール通りか
   def lexp_is_good(exp)
     # 0で始まる数字
@@ -103,7 +100,7 @@ class QController < ApplicationController
     return nil if exp.match?(/[×÷]0/)
     # 演算子 0 *
     # 演算子 0 /
-    return nil if exp.match?(/[＋－×÷]0[×÷]/)
+    return nil if exp.match?(/(^|[＋－])0[×÷]/)
     # 連続演算子
     return nil if exp.match?(/[＋－×÷][＋－×÷]/)
     # 行頭演算子
@@ -111,14 +108,14 @@ class QController < ApplicationController
     true
   end
 
-  # expを評価してrexpになればtrue
+  # expの評価結果がexpにあるかどうかと, 計算結果を返す
+  # 例外時にはnil, nil
   def all_ok(exp, rexp)
     e_exp = to_evalable(exp)
     result = eval(e_exp)
-    puts result
-    result == rexp
+    return (result == rexp), result
   rescue RuntimeError
-    nil
+    return nil, nil
   end
 
   # eval可能な式に変換する
