@@ -22,6 +22,12 @@ class QController < ApplicationController
       session[:lexp] = @lexp
       session[:rexp] = @rexp
       session[:disabled] = @disabled
+    elsif session[:result] == "retry"
+      @buttons = session[:buttons]
+      @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
+      @lexp = ""
+      session[:lexp] = ""
+      session[:disabled] = @disabled
     else
       i = session[:clicked].to_i
       @buttons = session[:buttons]
@@ -32,7 +38,9 @@ class QController < ApplicationController
     if session[:result] == "wrong"
       @shake = "shake"
       @wrong = "visible"
-      session[:result] = "init"
+      puts session[:value]
+      @value = session[:value].end_with?("/1") ? session[:value].to_i : session[:value]
+      session[:result] = "retry"
     end
     # 許容できない選択の場合は画面を揺らす
     if session[:result] == "error"

@@ -17,6 +17,10 @@ function updateStopwatch() {
     const sw = document.getElementById('stopwatch');
     const startTime = parseInt(localStorage.getItem('stopwatchStart'), 10);
 
+    if (!sw) {
+        return
+    }
+    
     if (!startTime) {
         sw.textContent = "0.00 秒";
         return;

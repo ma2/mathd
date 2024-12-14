@@ -5,7 +5,7 @@
 <h1>すうじたんてい</h1>
 <p id="stopwatch">0.000 秒</p>
 <%# <button id="clearButton">クリア</button> %>
-<%= link_to "Give Up", q_giveup_path %>
+<%= link_to "参りました！", q_giveup_path %>
 <div class="description">
   <span>× 0 や 0 ÷ は使えません</span>
 </div>
@@ -49,7 +49,6 @@
 </div>
 
 <div class="result <%=@wrong%>">
-  残念でした！
-  <%=@time%>
+  残念でした！ あなたの答えは<%=@value%>でした！
   <%= link_to "もう一度やる", root_path %>
 </div>
