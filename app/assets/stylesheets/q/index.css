@@ -20,6 +20,10 @@
     align-items: center;
 }
 
+.bs {
+    margin-left: 3em;
+}
+
 .shake {
     display:inline-block;
     animation-name:shakeSetting;

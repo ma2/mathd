@@ -17,22 +17,23 @@ class QController < ApplicationController
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
       # ボタンの活性、非活性の配列
-      @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
+      init_disabled
       session[:buttons] = @buttons
       session[:lexp] = @lexp
       session[:rexp] = @rexp
       session[:disabled] = @disabled
+      session[:click_history] = []
     elsif session[:result] == "retry"
-      @buttons = session[:buttons]
-      @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
+      init_disabled
       @lexp = ""
       session[:lexp] = ""
       session[:disabled] = @disabled
-    else
-      i = session[:clicked].to_i
-      @buttons = session[:buttons]
-      # 加減乗除は何度でも使えるので非活性にならない
-      @disabled[i] = true if i < 8
+      session[:click_history] = []
+      # else
+      #   i = session[:clicked].to_i
+      #   @buttons = session[:buttons]
+      #   # 加減乗除は何度でも使えるので非活性にならない
+      #   @disabled[i] = true if i < 8
     end
     # 結果間違っているなら初期に戻す
     if session[:result] == "wrong"
@@ -56,9 +57,16 @@ class QController < ApplicationController
   def update
     # クリックしたボタンと式から新しい式を作り評価する
     params.permit([ :clicked ])
-    i = params[:clicked].to_i
-    buttons = session[:buttons]
-    new_lexp = session[:lexp] + buttons[i]
+    clicked = params[:clicked].to_i
+    click_history = session[:click_history] || []
+    # BSクリックの場合、クリック履歴を1つ戻す
+    if clicked == 100
+      click_history.pop
+      new_lexp = session[:lexp][0..-2]
+    else
+      click_history << clicked
+      new_lexp = session[:lexp] + session[:buttons][clicked]
+    end
     session[:result] = false
     # ユーザー入力式が不正なら何もせずに:errorで返す
     unless lexp_is_good(new_lexp)
@@ -66,9 +74,14 @@ class QController < ApplicationController
       redirect_to action: :index
       return
     end
+    # click_historyからクリック済みボタンのdisableをtrueに設定する
+    init_disabled
+    click_history.each do |clicked|
+      @disabled[clicked] = true if clicked < 8
+    end
+    session[:disabled] = @disabled
     session[:lexp] = new_lexp
-    session[:clicked] = i
-    session[:disabled][i] = true if i < 8
+    session[:click_history] = click_history
     # まだ入力途中なら:continueで返す
     unless input_done(new_lexp)
       session[:result] = :continue
@@ -89,6 +102,10 @@ class QController < ApplicationController
   end
 
   private
+
+  def init_disabled
+    @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
+  end
 
   def get_now(tz = "Asia/Tokyo")
     Time.use_zone(tz) { Time.zone.now.strftime("%m%d%H%M") }
