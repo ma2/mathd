@@ -29,11 +29,6 @@ class QController < ApplicationController
       session[:lexp] = ""
       session[:disabled] = @disabled
       session[:click_history] = []
-      # else
-      #   i = session[:clicked].to_i
-      #   @buttons = session[:buttons]
-      #   # 加減乗除は何度でも使えるので非活性にならない
-      #   @disabled[i] = true if i < 8
     end
     # 結果間違っているなら初期に戻す
     if session[:result] == "wrong"
@@ -88,6 +83,9 @@ class QController < ApplicationController
       redirect_to action: :index
       return
     end
+    # 入力完了。検算する
+    disable_operation
+    session[:disabled] = @disabled
     result, value = all_ok(new_lexp, session[:rexp])
     session[:result] = result ? :complete : :wrong
     session[:value] = value
@@ -103,8 +101,14 @@ class QController < ApplicationController
 
   private
 
+  # ボタンを初期化する
   def init_disabled
     @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
+  end
+
+  # 加減乗除とBSを非活性にする
+  def disable_operation
+    @disabled[8..12] = [ true, true, true, true, true ]
   end
 
   def get_now(tz = "Asia/Tokyo")
