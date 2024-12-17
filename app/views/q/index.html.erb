@@ -7,7 +7,8 @@
 <%# <button id="clearButton">クリア</button> %>
 <%= link_to "参りました！", q_giveup_path %>
 <div class="description">
-  <span>× 0 や 0 ÷ は使えません</span>
+  <p>青枠に計算式を作って、赤枠の答えにしよう！</p>
+  <p>× 0 や 0 ÷ は使えません</p>
 </div>
 <div class="<%=@shake%>">
   <%= form_with url: "/q/update", method: :post do |form| %>
@@ -31,12 +32,12 @@
       <% end %>
     <%= button_tag "◀", name: "clicked", value: 100, class: "bs", disabled: @disabled[12] %>
     </div>
-    <div class="container">
-      <div class="lexp">
-        <%= @lexp %>
-      </div>
-      ＝　
-      <div class="rexp">
+    <div class="lexp">
+      <p><%= @lexp %></p>
+    </div>
+    <div class="rexp">
+      <div>＝</div>　
+      <div>
         <%= @rexp %>
       </div>
     </div>
