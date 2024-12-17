@@ -29,7 +29,7 @@
       <% %w(＋ － × ÷).each_with_index do |op, i| %>
       <%= button_tag op, name: 'clicked', value: i + 8, disabled: @disabled[i + 8] %>
       <% end %>
-    <%= button_tag "とりけし", name: "clicked", value: 100, class: "bs", disabled: @disabled[12] %>
+    <%= button_tag "取消", name: "clicked", value: 100, class: "bs", disabled: @disabled[12] %>
     </div>
     <div class="container">
       <div class="lexp">
