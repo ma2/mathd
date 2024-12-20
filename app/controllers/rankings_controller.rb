@@ -3,7 +3,8 @@ class RankingsController < ApplicationController
 
   # GET /rankings or /rankings.json
   def index
-    @rankings = Ranking.all
+    qid = params[:qid]
+    @rankings = Ranging.ranking_by_q(qid)
   end
 
   # GET /rankings/1 or /rankings/1.json
