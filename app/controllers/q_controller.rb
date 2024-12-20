@@ -120,7 +120,6 @@ class QController < ApplicationController
     q.value
   end
 
-  #
   # 式がルール通りか
   def lexp_is_good(exp)
     # 0で始まる数字

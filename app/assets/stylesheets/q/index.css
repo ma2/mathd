@@ -16,16 +16,16 @@
     border: 2px dotted slateblue;
 }
 
+.lexp > p {
+    padding: 1em;
+    margin: 0;
+}
+
 .rexp {
     display: flex;
     padding: 0.5em;
     margin: 0.5em;
     border: 2px dotted orangered;
-}
-
-.container{
-    display: flex;
-    align-items: center;
 }
 
 .bs {
@@ -37,7 +37,8 @@
  }
 
  .result {
-    padding: 1em;
+    padding: 0.5em;
+    margin: 0.5em;
     width: 50%;
     border: 2px solid slateblue;
  }
