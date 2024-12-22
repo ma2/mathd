@@ -1,52 +1,47 @@
 class QController < ApplicationController
   def index
-    @rexp = session[:rexp]
-    @lexp = session[:lexp]
-    @disabled = session[:disabled]
-    @buttons = session[:buttons]
+    restore_from_session
     @shake = "noshake"
     @complete = "invisible"
     @wrong = "invisible"
     # セッションにlexp（ユーザ入力）が入っていなければ初期化する
     if session[:result].blank? || session[:result] == "init"
-      # タイマースタート
-      # 日時を取得（タイムゾーン依存）
+      # ボタンをすべて活性に初期化
+      init_disabled
+      # 日時を取得
       now = get_now
       # Questionテーブルから右辺を取得
       @rexp = get_rexp(now)
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
-      # ボタンの活性、非活性の配列
-      init_disabled
-      session[:buttons] = @buttons
-      session[:lexp] = @lexp
-      session[:rexp] = @rexp
-      session[:disabled] = @disabled
-      session[:click_history] = []
-    elsif session[:result] == "retry"
+    end
+    # 再挑戦
+    if session[:result] == "retry"
+      # ボタンをすべて活性に初期化
       init_disabled
       @lexp = ""
-      session[:lexp] = ""
-      session[:disabled] = @disabled
-      session[:click_history] = []
+      @click_history = []
     end
-    # 結果間違っているなら初期に戻す
-    if session[:result] == "wrong"
+    # 結果が間違っているなら初期に戻す
+    if @result == "wrong"
       @shake = "shake"
       @wrong = "visible"
-      puts session[:value]
       @value = session[:value].end_with?("/1") ? session[:value].to_i : session[:value]
-      session[:result] = "retry"
+      @click_history = []
+      @result = "retry"
     end
     # 許容できない選択の場合は画面を揺らす
-    if session[:result] == "error"
+    if @result == "error"
       @shake = "shake"
     end
-    # 正解したら表示する
-    if session[:result] == "complete"
+    # 正解したら正解表示する
+    if @result == "complete"
       @complete = "visible"
       reset_session
     end
+    # 出題のid（UUIDに置き換えるかも）
+    # @qid = Question.find_by(:)
+    save_to_session
   end
 
   def update
@@ -109,6 +104,26 @@ class QController < ApplicationController
   # 加減乗除とBSを非活性にする
   def disable_operation
     @disabled[8..12] = [ true, true, true, true, true ]
+  end
+
+  # インスタンス変数の内容をセッションに反映する
+  def save_to_session
+    session[:lexp] = @lexp
+    session[:rexp] = @rexp
+    session[:result] = @result
+    session[:buttons] = @buttons
+    session[:disabled] = @disabled
+    session[:click_history] = @click_history || []
+  end
+
+  # セッションの内容をインスタンス変数に反映する
+  def restore_from_session
+    @rexp = session[:rexp]
+    @lexp = session[:lexp]
+    @result = session[:result]
+    @buttons = session[:buttons]
+    @disabled = session[:disabled]
+    @click_history = session[:click_history]
   end
 
   def get_now(tz = "Asia/Tokyo")
