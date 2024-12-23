@@ -20,7 +20,6 @@ class QController < ApplicationController
       # ボタンをすべて活性に初期化
       init_disabled
       @lexp = ""
-      @click_history = []
     end
     # 結果が間違っているなら初期に戻す
     if @result == "wrong"
@@ -58,9 +57,9 @@ class QController < ApplicationController
       new_lexp = session[:lexp] + session[:buttons][clicked]
     end
     session[:result] = false
-    # ユーザー入力式が不正なら何もせずに:errorで返す
+    # ユーザー入力式が不正なら何もせずに"error"で返す
     unless lexp_is_good(new_lexp)
-      session[:result] = :error
+      session[:result] = "error"
       redirect_to action: :index
       return
     end
@@ -72,9 +71,9 @@ class QController < ApplicationController
     session[:disabled] = @disabled
     session[:lexp] = new_lexp
     session[:click_history] = click_history
-    # まだ入力途中なら:continueで返す
+    # まだ入力途中なら"continue"で返す
     unless input_done(new_lexp)
-      session[:result] = :continue
+      session[:result] = "continue"
       redirect_to action: :index
       return
     end
@@ -82,7 +81,12 @@ class QController < ApplicationController
     disable_operation
     session[:disabled] = @disabled
     result, value = all_ok(new_lexp, session[:rexp])
-    session[:result] = result ? :complete : :wrong
+    session[:result] = result ? "complete" : "wrong"
+    # 正解ならランキングに保存する
+    if session[:result] == "complete"
+      question = Question.find(session[:qid])
+      @ranking = question.rankings.create(rexp: session[:rexp], lexp: session[:lexp], seconds: 12.3)
+    end
     session[:value] = value
     redirect_to action: :index
   end
@@ -108,6 +112,7 @@ class QController < ApplicationController
 
   # インスタンス変数の内容をセッションに反映する
   def save_to_session
+    session[:qid] = @q.id if @q
     session[:lexp] = @lexp
     session[:rexp] = @rexp
     session[:result] = @result
@@ -118,6 +123,7 @@ class QController < ApplicationController
 
   # セッションの内容をインスタンス変数に反映する
   def restore_from_session
+    @qid = session[:qid]
     @rexp = session[:rexp]
     @lexp = session[:lexp]
     @result = session[:result]
@@ -131,8 +137,8 @@ class QController < ApplicationController
   end
 
   def get_rexp(now)
-    q = Question.find_by(date: now)
-    q.value
+    @q = Question.find_by(date: now)
+    @q.value
   end
 
   # 式がルール通りか
