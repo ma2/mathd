@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  running: false
+  started_at: 2024-12-23 22:12:35
+  elapsed_milliseconds: 1
+
+two:
+  running: false
+  started_at: 2024-12-23 22:12:35
+  elapsed_milliseconds: 1

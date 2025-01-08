@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_20_061445) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_23_131235) do
   create_table "questions", force: :cascade do |t|
     t.string "date"
     t.string "expression"
@@ -30,6 +30,16 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_20_061445) do
     t.float "seconds"
     t.integer "question_id", null: false
     t.index ["question_id"], name: "index_rankings_on_question_id"
+  end
+
+  create_table "stopwatches", force: :cascade do |t|
+    t.boolean "running", default: false, null: false
+    t.datetime "started_at"
+    t.integer "elapsed_milliseconds", default: 0, null: false
+    t.string "anonymous_user_token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["anonymous_user_token"], name: "index_stopwatches_on_anonymous_user_token", unique: true
   end
 
   add_foreign_key "rankings", "questions"

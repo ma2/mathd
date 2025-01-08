@@ -1,10 +1,24 @@
 Rails.application.routes.draw do
+  # get "q/start"
+  # get "q/giveup"
+  # get "q/ranking"
+  # post "q/update"
+  resource :q, controller: "q", only: [] do
+    get :start
+    get :complete
+    get :failure
+    get :retry
+    get :giveup
+    get :ranking
+    post :update
+  end
   resources :rankings
-  get "q/index"
-  get "q/giveup"
-  get "q/ranking"
-  post "q/update"
   resources :questions
+  resource :stopwatch, only: [ :show ] do
+    post :start
+    post :stop
+    post :reset
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -16,5 +30,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "q#index"
+  root "q#start"
 end

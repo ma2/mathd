@@ -1,0 +1,9 @@
+<%= render "mondai" %>
+
+<div data-controller="stopwatch">
+  <div class="result visible" data-stopwatch-target="complete">
+    正解です！
+    <%=@time%>
+    <%= link_to "ランキングへ", ranking_q_path, lexp: @lexp %>
+  </div>
+</div>

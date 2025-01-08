@@ -1,11 +1,11 @@
 class QController < ApplicationController
-  def index
+  def start
     restore_from_session
     @shake = "noshake"
-    @complete = "invisible"
-    @wrong = "invisible"
-    # セッションにlexp（ユーザ入力）が入っていなければ初期化する
-    if session[:result].blank? || session[:result] == "init"
+    # resultがerrorまたはcontinue以外なら初期化する
+    if @result != "error" && @result != "continue"
+      logger.debug("--init--")
+      @result = ""
       # ボタンをすべて活性に初期化
       init_disabled
       # 日時を取得
@@ -14,81 +14,100 @@ class QController < ApplicationController
       @rexp = get_rexp(now)
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
-    end
-    # 再挑戦
-    if session[:result] == "retry"
-      # ボタンをすべて活性に初期化
-      init_disabled
-      @lexp = ""
-    end
-    # 結果が間違っているなら初期に戻す
-    if @result == "wrong"
-      @shake = "shake"
-      @wrong = "visible"
-      @value = session[:value].end_with?("/1") ? session[:value].to_i : session[:value]
       @click_history = []
-      @result = "retry"
     end
+
     # 許容できない選択の場合は画面を揺らす
     if @result == "error"
       @shake = "shake"
     end
-    # 正解したら正解表示する
-    if @result == "complete"
-      @complete = "visible"
-      reset_session
-    end
-    # 出題のid（UUIDに置き換えるかも）
-    # @qid = Question.find_by(:)
+
+    # result==continueの場合は何もしない
     save_to_session
   end
 
   def update
+    # 他のアクションとインスタンス変数は共有されないのでセッションから復元
+    restore_from_session
     # クリックしたボタンと式から新しい式を作り評価する
-    params.permit([ :clicked ])
+    params.permit([ :clicked, :authenticity_token ])
     clicked = params[:clicked].to_i
-    click_history = session[:click_history] || []
+    # click_history = session[:click_history] || []
     # BSクリックの場合、クリック履歴を1つ戻す
     if clicked == 100
-      click_history.pop
-      new_lexp = session[:lexp][0..-2]
+      @click_history.pop
+      new_lexp = @lexp[0..-2]
     else
-      click_history << clicked
-      new_lexp = session[:lexp] + session[:buttons][clicked]
+      @click_history << clicked
+      new_lexp = @lexp + @buttons[clicked]
     end
-    session[:result] = false
     # ユーザー入力式が不正なら何もせずに"error"で返す
     unless lexp_is_good(new_lexp)
-      session[:result] = "error"
-      redirect_to action: :index
+      @result = "error"
+      save_to_session
+      redirect_to action: :start
       return
     end
     # click_historyからクリック済みボタンのdisableをtrueに設定する
     init_disabled
-    click_history.each do |clicked|
+    @click_history.each do |clicked|
       @disabled[clicked] = true if clicked < 8
     end
-    session[:disabled] = @disabled
-    session[:lexp] = new_lexp
-    session[:click_history] = click_history
+    @lexp = new_lexp
+    # @click_history = click_history
     # まだ入力途中なら"continue"で返す
     unless input_done(new_lexp)
-      session[:result] = "continue"
-      redirect_to action: :index
+      @result = "continue"
+      save_to_session
+      redirect_to action: :start
       return
     end
     # 入力完了。検算する
     disable_operation
-    session[:disabled] = @disabled
-    result, value = all_ok(new_lexp, session[:rexp])
-    session[:result] = result ? "complete" : "wrong"
-    # 正解ならランキングに保存する
-    if session[:result] == "complete"
-      question = Question.find(session[:qid])
-      @ranking = question.rankings.create(rexp: session[:rexp], lexp: session[:lexp], seconds: 12.3)
+    @result, @value = all_ok(@lexp, @rexp)
+    save_to_session
+    if @result == "complete"
+      redirect_to action: :complete
+      return
     end
-    session[:value] = value
-    redirect_to action: :index
+    redirect_to action: :failure
+  end
+
+  def complete
+    restore_from_session
+    if @result != "complete"
+      # エラーにする
+      render plain: "ERR: not complete but #{@result}", status: :unprocessable_entity
+    end
+    # 正解ならランキングに保存する
+    question = Question.find(session[:qid])
+    @ranking = question.rankings.create(rexp: @rexp, lexp: @lexp, seconds: 12.3)
+    reset_session
+  end
+
+  def failure
+    restore_from_session
+    if @result != "failure"
+      # エラーにする
+      render plain: "ERR: not failure but #{@result}", status: :unprocessable_entity
+    end
+    @value = @value.end_with?("/1") ? @value.to_i : @value
+    @click_history = []
+    # retry用にセッションを変えておく
+    @result = "retry"
+    save_to_session
+  end
+
+  def retry
+    restore_from_session
+    if @result != "retry"
+      # エラーにする
+      render plain: "ERR: not retry but #{@result}", status: :unprocessable_entity
+    end
+    # BSボタンをすべて活性に初期化
+    init_disabled
+    @lexp = ""
+    save_to_session
   end
 
   def ranking
@@ -100,6 +119,19 @@ class QController < ApplicationController
 
   private
 
+  # トークンを生成する
+  def create_token
+    @token = cookies.signed[:anonymous_token]
+    if @token.blank?
+      @token = SecureRandom.uuid
+      # Cookie に保存 (暗号化 or 署名のため signed Cookie)
+      cookies.signed[:anonymous_token] = {
+        value: token,
+        httponly: true,
+        expires: 30.day.from_now
+      }
+    end
+  end
   # ボタンを初期化する
   def init_disabled
     @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
@@ -115,6 +147,7 @@ class QController < ApplicationController
     session[:qid] = @q.id if @q
     session[:lexp] = @lexp
     session[:rexp] = @rexp
+    session[:value] = @value
     session[:result] = @result
     session[:buttons] = @buttons
     session[:disabled] = @disabled
@@ -126,6 +159,7 @@ class QController < ApplicationController
     @qid = session[:qid]
     @rexp = session[:rexp]
     @lexp = session[:lexp]
+    @value = session[:value]
     @result = session[:result]
     @buttons = session[:buttons]
     @disabled = session[:disabled]
@@ -162,7 +196,7 @@ class QController < ApplicationController
   def all_ok(exp, rexp)
     e_exp = to_evalable(exp)
     result = eval(e_exp)
-    return (result == rexp), result
+    return (result == rexp ? "complete" : "failure"), result
   rescue RuntimeError
     return nil, nil
   end
