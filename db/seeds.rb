@@ -10,10 +10,11 @@
 
 require "csv"
 
-CSV.foreach('db/mondai.csv', headers: true) do |row|
+CSV.foreach('db/mondai2.csv', headers: true) do |row|
   Question.create(
     date: row['date'],
     expression: row['expression'],
     value: row['value'],
+    qid: row['qid'],
   )
 end

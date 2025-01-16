@@ -1,8 +1,4 @@
 Rails.application.routes.draw do
-  # get "q/start"
-  # get "q/giveup"
-  # get "q/ranking"
-  # post "q/update"
   resource :q, controller: "q", only: [] do
     get :start
     get :complete
@@ -13,6 +9,10 @@ Rails.application.routes.draw do
     post :update
   end
   resources :rankings
+  resource :ranking, only: [] do
+    post :log
+  end
+
   resources :questions
   resource :stopwatch, only: [ :show ] do
     post :start

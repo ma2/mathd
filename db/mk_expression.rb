@@ -1,3 +1,5 @@
+require 'securerandom'
+
 # 現在時刻をmmddHHMM形式の文字列に変換する
 # @param timezone [String] タイムゾーン（デフォルト: 'Asia/Tokyo'）
 # @return [String] mmddHHMM形式の文字列
@@ -30,9 +32,9 @@ def add_operators(numbers)
 
     # 最後の要素でない場合に処理を行う
     if index < shuffled_numbers.size - 1
-      # 数値が2つ続いていたら演算子を挿入
+      # 数値が2つ続いていたら80%の確率で演算子を挿入
       # 0始まりなら演算子を挿入
-      if part_nums.size > 1 || part_nums == [ 0 ]
+      if (part_nums.size > 1 && rand < 0.8) || part_nums == [ 0 ]
         # 数値をRationalにするためrを挿入
         result << "r"
         result << operators.sample
@@ -100,8 +102,8 @@ def mk_expression(time_str)
 end
 
 if __FILE__ == $0
-  File.open("mondai.csv", "w") do |f|
-    [ '12', '01' ].each do |mon|
+  File.open("mondai2.csv", "w") do |f|
+    ('01'..'03').each do |mon|
       ('01'..'31').each do |day|
         puts "#{mon}#{day}"
         ('00'..'23').each do |hour|
@@ -110,7 +112,7 @@ if __FILE__ == $0
             _, exp, result = mk_expression(time_str)
             exp.delete!("r")
             result = result.to_i
-            f.write("#{time_str},#{exp},#{result}\n")
+            f.write("#{time_str},#{exp},#{result},#{SecureRandom.alphanumeric}\n")
             print(".")
           end
           puts

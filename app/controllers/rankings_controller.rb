@@ -48,6 +48,20 @@ class RankingsController < ApplicationController
     end
   end
 
+    # POST /ranking/log.json
+    def log
+      params = log_ranking_params
+      q = Question.find_by_qid(params[:qid])
+      q.rankings.build(lexp: params[:lexp], hn: params[:token], seconds: params[:time])
+      respond_to do |format|
+        if q.save
+          format.json { render json: { message: "success" }, status: :created }
+        else
+          format.json { render json: q.errors, status: :unprocessable_entity }
+        end
+      end
+    end
+
   # DELETE /rankings/1 or /rankings/1.json
   def destroy
     @ranking.destroy!
@@ -67,5 +81,9 @@ class RankingsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def ranking_params
       params.expect(ranking: [ :mondai, :rexp, :lexp, :hn ])
+    end
+
+    def log_ranking_params
+      params.permit(:qid, :token, :time, :lexp, :authenticity_token)
     end
 end

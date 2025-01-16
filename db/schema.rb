@@ -10,14 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_23_131235) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_12_041551) do
   create_table "questions", force: :cascade do |t|
     t.string "date"
     t.string "expression"
     t.integer "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "qid"
     t.index ["date"], name: "index_questions_on_date"
+    t.index ["qid"], name: "index_questions_on_qid", unique: true
   end
 
   create_table "rankings", force: :cascade do |t|

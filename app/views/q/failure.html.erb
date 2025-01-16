@@ -1,8 +1,2 @@
 <%= render "mondai" %>
-
-<div data-controller="stopwatch">
-  <div class="result shake" data-stopwatch-target="failure">
-    残念！ あなたの答えは<%=@value%>でした！<br/>
-    <%= link_to "同じ問題でもう一度！", retry_q_path, method: :get %>
-  </div>
-</div>
+<%= render "failure" %>

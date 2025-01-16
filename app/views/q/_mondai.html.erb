@@ -1,7 +1,7 @@
 <h1>すうじ探偵</h1>
 
 <div data-controller="stopwatch">
-  <span data-stopwatch-target="display">0.000</span>秒
+  <span data-stopwatch-target="display" id="stopwatch">0.000</span>秒
   <div style="margin-top:1rem;">
     <button data-action="click->stopwatch#giveup">まいりました！</button>
   </div>
@@ -12,30 +12,11 @@
 </div>
 <div class="<%=@shake%>">
   <%= form_with url: q_path, method: :post do |form| %>
-    <div class="number_boxes">
-      <%= button_tag @buttons[0], name: 'clicked', value: 0, disabled: @disabled[0] %>
-      <%= button_tag @buttons[1], name: 'clicked', value: 1, disabled: @disabled[1] %>
-      <span>月</span>
-      <%= button_tag @buttons[2], name: 'clicked', value: 2, disabled: @disabled[2] %>
-      <%= button_tag @buttons[3], name: 'clicked', value: 3, disabled: @disabled[3] %>
-      <span>日</span>
-      <%= button_tag @buttons[4], name: 'clicked', value: 4, disabled: @disabled[4] %>
-      <%= button_tag @buttons[5], name: 'clicked', value: 5, disabled: @disabled[5] %>
-      <span>時</span>
-      <%= button_tag @buttons[6], name: 'clicked', value: 6, disabled: @disabled[6]%>
-      <%= button_tag @buttons[7], name: 'clicked', value: 7, disabled: @disabled[7]%>
-      <span>分</span>
-    </div>
-    <div class="operators">
-      <% %w(＋ － × ÷).each_with_index do |op, i| %>
-      <%= button_tag op, name: 'clicked', value: i + 8, disabled: @disabled[i + 8] %>
-      <% end %>
-    <%= button_tag "◀", name: "clicked", value: 100, class: "bs", disabled: @disabled[12] %>
-    </div>
-    <div class="lexp">
-      <%= @lexp %>　
-    </div>
-    <div class="rexp">
+  <%= hidden_field_tag "qid", @qid %>
+    <%= render "number_boxes" %>
+    <%= render "operators" %>
+    <%= render "lexp" %>
+    <div class="rexp" id="rexp">
       <div>＝</div>　
       <div>
         <%= @rexp %>

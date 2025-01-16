@@ -1,17 +1,20 @@
 class QController < ApplicationController
   def start
     restore_from_session
+    logger.debug("@result")
+    logger.debug(@result)
     @shake = "noshake"
     # resultがerrorまたはcontinue以外なら初期化する
     if @result != "error" && @result != "continue"
-      logger.debug("--init--")
-      @result = ""
       # ボタンをすべて活性に初期化
       init_disabled
+      @value = ""
+      @result = ""
       # 日時を取得
       now = get_now
       # Questionテーブルから右辺を取得
       @rexp = get_rexp(now)
+      @qid = @q.qid
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
       @click_history = []
@@ -30,7 +33,8 @@ class QController < ApplicationController
     # 他のアクションとインスタンス変数は共有されないのでセッションから復元
     restore_from_session
     # クリックしたボタンと式から新しい式を作り評価する
-    params.permit([ :clicked, :authenticity_token ])
+    params.permit([ :clicked, :authenticity_token, :qid ])
+    @qid = params[:qid]
     clicked = params[:clicked].to_i
     # click_history = session[:click_history] || []
     # BSクリックの場合、クリック履歴を1つ戻す
@@ -54,10 +58,12 @@ class QController < ApplicationController
       @disabled[clicked] = true if clicked < 8
     end
     @lexp = new_lexp
+    @value = calc(new_lexp)
     # @click_history = click_history
     # まだ入力途中なら"continue"で返す
     unless input_done(new_lexp)
       @result = "continue"
+      logger.debug(@value)
       save_to_session
       redirect_to action: :start
       return
@@ -75,14 +81,15 @@ class QController < ApplicationController
 
   def complete
     restore_from_session
+    disable_operation
+
     if @result != "complete"
       # エラーにする
       render plain: "ERR: not complete but #{@result}", status: :unprocessable_entity
+      return
     end
-    # 正解ならランキングに保存する
-    question = Question.find(session[:qid])
-    @ranking = question.rankings.create(rexp: @rexp, lexp: @lexp, seconds: 12.3)
-    reset_session
+    @result = "init"
+    save_to_session
   end
 
   def failure
@@ -90,6 +97,7 @@ class QController < ApplicationController
     if @result != "failure"
       # エラーにする
       render plain: "ERR: not failure but #{@result}", status: :unprocessable_entity
+      return
     end
     @value = @value.end_with?("/1") ? @value.to_i : @value
     @click_history = []
@@ -103,6 +111,7 @@ class QController < ApplicationController
     if @result != "retry"
       # エラーにする
       render plain: "ERR: not retry but #{@result}", status: :unprocessable_entity
+      return
     end
     # BSボタンをすべて活性に初期化
     init_disabled
@@ -115,23 +124,11 @@ class QController < ApplicationController
 
   def giveup
     reset_session
+    cookies["_mathd_session"] = nil
   end
 
   private
 
-  # トークンを生成する
-  def create_token
-    @token = cookies.signed[:anonymous_token]
-    if @token.blank?
-      @token = SecureRandom.uuid
-      # Cookie に保存 (暗号化 or 署名のため signed Cookie)
-      cookies.signed[:anonymous_token] = {
-        value: token,
-        httponly: true,
-        expires: 30.day.from_now
-      }
-    end
-  end
   # ボタンを初期化する
   def init_disabled
     @disabled = [ false, false, false, false, false, false, false, false, false, false, false, false ]
@@ -144,7 +141,7 @@ class QController < ApplicationController
 
   # インスタンス変数の内容をセッションに反映する
   def save_to_session
-    session[:qid] = @q.id if @q
+    session[:qid] = @qid || @q.qid
     session[:lexp] = @lexp
     session[:rexp] = @rexp
     session[:value] = @value
@@ -194,17 +191,18 @@ class QController < ApplicationController
   # expの評価結果がexpにあるかどうかと, 計算結果を返す
   # 例外時にはnil, nil
   def all_ok(exp, rexp)
-    e_exp = to_evalable(exp)
-    result = eval(e_exp)
+    result = calc(exp)
     return (result == rexp ? "complete" : "failure"), result
   rescue RuntimeError
     return nil, nil
   end
 
   # eval可能な式に変換する
-  def to_evalable(expression)
+  def to_evalable(lexp)
+    # expression末尾が加減乗除なら削除する
+    lexp = lexp[0..-2] if "＋－×÷".include? lexp.last
     # 数値（整数）を検出し、末尾に `r` を追加
-    result = expression.gsub(/(\d+)/, '\1r')
+    result = lexp.gsub(/(\d+)/, '\1r')
     # 加減乗除を変換
     result.tr("＋－×÷", "+\\-*/")
   end
@@ -213,5 +211,10 @@ class QController < ApplicationController
   def input_done(exp)
     # 演算子を削除して8文字なら完了
     exp.delete("＋－×÷").size == 8
+  end
+
+  # 式（途中でも）を計算する
+  def calc(lexp)
+    eval(to_evalable(lexp))
   end
 end
