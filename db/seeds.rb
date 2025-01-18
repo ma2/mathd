@@ -10,11 +10,9 @@
 
 require "csv"
 
+csv_data = []
 CSV.foreach('db/mondai2.csv', headers: true) do |row|
-  Question.create(
-    date: row['date'],
-    expression: row['expression'],
-    value: row['value'],
-    qid: row['qid'],
-  )
+  csv_data <<
+    { date: row['date'], expression: row['expression'], value: row['value'], qid: row['qid'] }
 end
+Question.insert_all(csv_data)
