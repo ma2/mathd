@@ -1,8 +1,6 @@
 class QController < ApplicationController
   def start
     restore_from_session
-    logger.debug("@result")
-    logger.debug(@result)
     @shake = "noshake"
     # resultがerrorまたはcontinue以外なら初期化する
     if @result != "error" && @result != "continue"
