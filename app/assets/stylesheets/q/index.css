@@ -1,70 +1,78 @@
 .number_boxes {
-    padding: 1em 1em 0 1em;
+  padding: 1em 1em 0 1em;
 }
 
 .operators {
-    padding: 1em;
+  padding: 1em;
 }
 
 .description {
-    padding: 1em;
+  padding: 1em;
 }
 
 .lexp {
-    padding: 0.5em;
-    margin: 0.5em;
-    border: 2px dotted slateblue;
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 2px dotted slateblue;
 }
 
 .lexp > p {
-    padding: 1em;
-    margin: 0;
+  padding: 1em;
+  margin: 0;
 }
 
 .rexp {
-    display: flex;
-    padding: 0.5em;
-    margin: 0.5em;
-    border: 2px dotted orangered;
+  display: flex;
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 2px dotted orangered;
 }
 
 .bs {
-    margin-left: 3em;
+  margin-left: 3em;
 }
 
- .noshake {
-    width: 50%;
- }
-
- .result {
-    padding: 0.5em;
-    margin: 0.5em;
-    width: 50%;
-    border: 2px solid slateblue;
- }
-
- .visible {
-    display: block;
- }
-
- .invisible {
-    display: none;
- }
-
- @keyframes rumble {
-    0%   { transform:translate(0, 0); }
-    25%  { transform:translate(0, 2px) rotate(5deg); }
-    50%  { transform:translate(0, 0, 0); }
-    75%  { transform:translate(0, -2px) rotate(-5deg); }
-    100% { transform:translate(0, 0); }
+.noshake {
 }
- 
+
+.result {
+  padding: 0.5em;
+  margin: 0.5em;
+  width: 50%;
+  border: 2px solid slateblue;
+}
+
+.visible {
+  display: block;
+}
+
+.invisible {
+  display: none;
+}
+
+@keyframes rumble {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(0, 2px) rotate(5deg);
+  }
+  50% {
+    transform: translate(0, 0, 0);
+  }
+  75% {
+    transform: translate(0, -2px) rotate(-5deg);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
 .shake {
-    width: 50%;
-    animation:rumble 0.1s linear infinite;
-    animation-iteration-count:6;
+  animation: rumble 0.1s linear infinite;
+  animation-iteration-count: 6;
 }
 
 #value {
-    color: gray
+  color: gray;
 }

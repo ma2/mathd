@@ -1,3 +1,4 @@
-    <div class="lexp" id="lexp">
-      <%= @lexp %>&nbsp;<span id="value"><%= format_value(@value) %></span>
+    <div id="lexp" class="mx-4 flex">
+      <div class="rounded border-2 border-blue-500 px-2 py-6 mx-1 text-xl"><%= @lexp %>　</div>
+      <div id="value" class="text-2xl text-gray-400 font-semibold"><%= format_value(@value) %></div>
     </div>

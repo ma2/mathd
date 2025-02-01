@@ -114,6 +114,7 @@ class QController < ApplicationController
     # BSボタンをすべて活性に初期化
     init_disabled
     @lexp = ""
+    @value = ""
     save_to_session
   end
 

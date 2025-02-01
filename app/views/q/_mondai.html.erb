@@ -1,13 +1,13 @@
-<h1>すうじ探偵</h1>
+<h1 class="text-4xl text-green-700 text-center font-semibold">すうじ探偵</h1>
 
 <div data-controller="stopwatch" data-stopwatch-timer-value="">
-  <span data-stopwatch-target="display" id="stopwatch">0.000</span>秒
-  <div style="margin-top:1rem;">
-    <button data-action="click->stopwatch#giveup">まいりました！</button>
+  <p class="text-2xl text-center"><span data-stopwatch-target="display" id="stopwatch">0.000</span>秒</p>
+  <div class="text-center">
+    <button data-action="click->stopwatch#giveup" class="rounded border-red-300 border-2 p-2">まいりました！</button>
   </div>
 </div>
-<div class="description">
-  <p>青枠に式を作って、赤枠の答えにしよう！</p>
+<div class="m-4 text-left">
+  <p>式を作って、赤文字の答えにしよう！</p>
   <p>× 0 や 0 ÷ は使えないよ</p>
 </div>
 <div class="<%=@shake%>">
@@ -16,7 +16,7 @@
     <%= render "number_boxes" %>
     <%= render "operators" %>
     <%= render "lexp" %>
-    <div class="rexp" id="rexp">
+    <div class="text-4xl text-red-700 m-4 flex justify-center font-semibold" id="rexp">
       <div>＝</div>　
       <div>
         <%= @rexp %>
