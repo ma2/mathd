@@ -36,14 +36,16 @@ class QController < ApplicationController
     params.permit([ :clicked, :authenticity_token, :qid ])
     @qid = params[:qid]
     clicked = params[:clicked].to_i
-    # click_history = session[:click_history] || []
     # BSクリックの場合、クリック履歴を1つ戻す
+    new_lexp = @lexp
     if clicked == 100
       @click_history.pop
       new_lexp = @lexp[0..-2]
     else
-      @click_history << clicked
-      new_lexp = @lexp + @buttons[clicked]
+      if @click_history.last != clicked
+        @click_history.push(clicked)
+        new_lexp = @lexp + @buttons[clicked]
+      end
     end
     # ユーザー入力式が不正なら何もせずに"error"で返す
     unless lexp_is_good(new_lexp)
@@ -139,6 +141,11 @@ class QController < ApplicationController
   # 加減乗除とBSを非活性にする
   def disable_operation
     @disabled[8..12] = [ true, true, true, true, true ]
+  end
+
+  # 直前のクリック履歴と異なる場合にのみ追加する（二重送信対応）
+  def add_history(clicked)
+    @click_history.push(clicked) if @click_history.last != clicked
   end
 
   # インスタンス変数の内容をセッションに反映する

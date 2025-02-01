@@ -1,6 +1,6 @@
     <div class="m-4 text-2xl font-mono" id="operators">
       <% %w(＋ － × ÷).each_with_index do |op, i| %>
-      <%= button_tag op, name: 'clicked', value: i + 8, disabled: @disabled[i + 8], class: "rounded border border-gray-800 w-10 py-6 shadow-lg" %>
+      <%= button_tag op, name: 'clicked', value: i + 8, disabled: @disabled[i + 8], disable_with:"x", class: "rounded border border-gray-800 w-10 py-6 shadow-lg" %>
       <% end %>
-    <%= button_tag "◀", name: "clicked", value: 100, class: "bs", disabled: @disabled[12], class: "rounded border border-gray-800 w-10 py-6" %>
+    <%= button_tag "◀", name: "clicked", value: 100, class: "bs", disabled: @disabled[12], disable_with:"x", class: "rounded border border-gray-800 w-10 py-6" %>
     </div>
