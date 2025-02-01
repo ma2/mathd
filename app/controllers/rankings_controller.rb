@@ -51,11 +51,14 @@ class RankingsController < ApplicationController
     # POST /ranking/log.json
     def log
       params = log_ranking_params
+      time = params[:time].to_i
       q = Question.find_by_qid(params[:qid])
-      q.rankings.build(lexp: params[:lexp], hn: params[:token], seconds: params[:time])
+      q.rankings.build(lexp: params[:lexp], hn: params[:token], ms: time)
       respond_to do |format|
         if q.save
-          format.json { render json: { message: "success" }, status: :created }
+          rankings = q.rankings.order(ms: :asc).pluck(:ms)
+          rank = rankings.index(time) + 1
+          format.json { render json: { message: "success", ranking: rank, time: time }, status: :created }
         else
           format.json { render json: q.errors, status: :unprocessable_entity }
         end

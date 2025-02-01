@@ -13,6 +13,8 @@ class QController < ApplicationController
       # Questionテーブルから右辺を取得
       @rexp = get_rexp(now)
       @qid = @q.qid
+      # 一位のタイム
+      @top_time = @q.rankings.order(ms: :asc).first&.ms
       @buttons = now.split("") + "＋－×÷".split("")
       @lexp = ""
       @click_history = []
@@ -69,6 +71,7 @@ class QController < ApplicationController
     # 入力完了。検算する
     disable_operation
     @result, @value = all_ok(@lexp, @rexp)
+    @result = "complete"
     save_to_session
     if @result == "complete"
       redirect_to action: :complete
@@ -147,6 +150,7 @@ class QController < ApplicationController
     session[:result] = @result
     session[:buttons] = @buttons
     session[:disabled] = @disabled
+    session[:top_time] = @top_time
     session[:click_history] = @click_history || []
   end
 
@@ -159,6 +163,7 @@ class QController < ApplicationController
     @result = session[:result]
     @buttons = session[:buttons]
     @disabled = session[:disabled]
+    @top_time = session[:top_time]
     @click_history = session[:click_history]
   end
 

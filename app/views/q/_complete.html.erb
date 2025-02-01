@@ -1,7 +1,6 @@
 <div data-controller="stopwatch" id="complete">
-  <div class="visible flex justify-center" data-stopwatch-target="complete">
-    正解です！
-    <%=@time%>
-    <%= link_to "ランキングへ", ranking_q_path, lexp: @lexp %>
+  <div class="visible justify-center" data-stopwatch-target="complete">
+    <div>正解です。タイムは<span id="completeTime"></span>秒でした！</div>
+    <div>あなたは<span id="ranking"></span>位です！</div>
   </div>
 </div>

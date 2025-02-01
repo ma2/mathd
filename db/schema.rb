@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_12_041551) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_01_122102) do
   create_table "questions", force: :cascade do |t|
     t.string "date"
     t.string "expression"
@@ -23,14 +23,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_12_041551) do
   end
 
   create_table "rankings", force: :cascade do |t|
-    t.string "mondai"
-    t.integer "rexp"
     t.string "lexp"
     t.string "hn"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.float "seconds"
     t.integer "question_id", null: false
+    t.integer "ms"
     t.index ["question_id"], name: "index_rankings_on_question_id"
   end
 
