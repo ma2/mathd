@@ -71,7 +71,7 @@ class QController < ApplicationController
     # 入力完了。検算する
     disable_operation
     @result, @value = all_ok(@lexp, @rexp)
-    @result = "complete"
+    # @result = "complete"
     save_to_session
     if @result == "complete"
       redirect_to action: :complete
